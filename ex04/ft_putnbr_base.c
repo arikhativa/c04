@@ -6,76 +6,80 @@
 /*   By: yrabby <yrabby@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/24 12:56:26 by yrabby            #+#    #+#             */
-/*   Updated: 2022/05/24 15:36:10 by yrabby           ###   ########.fr       */
+/*   Updated: 2022/05/24 16:13:10 by yrabby           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <unistd.h>
 
-#define DECIMAL "0123456789"
-#define BINARY "01"
-#define OCTAL "poneyvif"
-#define HEX "0123456789ABCDEF"
+#define ERROR -1
+#define SUCCESS 0
 
 void	ft_putchar(char c)
 {
 	write(1, &c, 1);
 }
 
-void	ft_put_base(long n, long base)
+void	ft_put_base(long n, long base, char *base_test)
 {
 	if (n / base)
 	{
-		ft_put_base(n / base, base);
-		ft_put_base(n % base, base);
+		ft_put_base(n / base, base, base_test);
+		ft_put_base(n % base, base, base_test);
 	}
 	if (n < base)
-	{
-		if (n < 10)
-			ft_putchar(n + '0');
-		else if (n < 16)
-			ft_putchar(n + 'A' - 10);
-	}
+		ft_putchar(base_test[n]);
 }
 
-int	ft_strcmp(char *s1, char *s2)
+long	ft_strlen_check(char *s)
 {
-	if (!s1 || !s2)
-		return (0);
-	while (*s1 && *s1 == *s2)
+	long	i;
+
+	i = 0;
+	while (s[i])
 	{
-		++s1;
-		++s2;
+		if (s[i] == '-' || s[i] == '+')
+			return (ERROR);
+		++i;
 	}
-	return (*s1 - *s2);
+	return (i);
 }
 
 int	get_base(char *s, long *res)
 {
-	*res = -1;
-	if (!ft_strcmp(s, DECIMAL))
-		*res = 10;
-	else if (!ft_strcmp(s, BINARY))
-		*res = 2;
-	else if (!ft_strcmp(s, OCTAL))
-		*res = 8;
-	else if (!ft_strcmp(s, HEX))
-		*res = 16;
-	return (*res != -1);
+	long	i;
+	long	j;
+
+	i = 0;
+	*res = ft_strlen_check(s);
+	if (*res <= 1 || *res == ERROR)
+		return (ERROR);
+	while (i < *res)
+	{
+		j = i + 1;
+		while (j < *res)
+		{
+			if (s[i] == s[j])
+				return (ERROR);
+			++j;
+		}
+		++i;
+	}
+	return (SUCCESS);
 }
 
 void	ft_putnbr_base(int nbr, char *base)
 {
-	long	int_base;
+	long	long_base;
 	long	n;
 
 	n = (long)nbr;
-	if (!get_base(base, &int_base))
+	if (get_base(base, &long_base) == ERROR)
 		return ;
 	if (n < 0)
 	{
 		write(1, "-", 1);
 		n *= -1;
 	}
-	ft_put_base(n, int_base);
+	ft_put_base(n, long_base, base);
 }
